@@ -1,8 +1,12 @@
 module.exports = (app) => {
     const nodemailer = require('../controllers/controller.js');
+    
 
     // Create a new Note
     app.post('/nodemailer', nodemailer.send);
+    app.get('/Zoho', nodemailer.getZoho);
+    app.post('/Zoho',nodemailer.postZoho);
+    app.post('/Zoho1', nodemailer.create1);
     
 
 

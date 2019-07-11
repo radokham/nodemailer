@@ -1,5 +1,8 @@
 const Nodemailer = require('../models/model.js');
 const nodemailer = require("nodemailer");
+const config = require('../config/zoho.config.js');
+const zoho = require('@trifoia/zcrmsdk');
+
 // Create and Save a new Note
 exports.create = (req, res) => {
     // Validate request
@@ -146,4 +149,69 @@ exports.send = function (req, res) {
         console.log('Message sent: %s', info.messageId);
         res.sendStatus(200);
     });
+};
+
+module.exports.getZoho =  (req, res, next) => {
+    zoho.initialize(config).then((client) => {
+        client.API.MODULES.get({
+            module: 'Contacts',
+            params: {
+                page: 0,
+                per_page: 25,
+            },
+        }).then((response) => {
+            res.json(JSON.parse(response.body));
+        }).catch(next);
+    }).catch(next);
+};
+
+module.exports.postZoho = (req, res, next) => {
+    zoho.initialize(config).then((client) => {
+        client.API.MODULES.post({
+            module: 'Contacts',
+            body: {
+                // Pay ATTENTION! Data is an array!
+                data: [
+                  {
+                    First_Name:"princy",
+                    Last_Name: "Ratsimbazafy",
+                    Email: "princyratsimbazafy@gmail.com",
+                    Mobile: "0326408624",
+                  }
+                ],
+            },
+        }).then((data) => {
+            const { data1 } = JSON.parse(data.body);
+
+            res.json({ data1 });
+        });
+    });
+};
+
+
+// Create and Save a new Note
+exports.create1 = (req, res) => {
+    // Validate request
+    console.log(req.body)
+    if (!req.body) {
+        return res.status(400).send({
+            message: "Note content can not be empty"
+        });
+    }
+
+    // Create a Note
+    const nodemailer = new Nodemailer({
+        nom: "princy" || "Untitled Note",
+        email: "princyratsimbazafy@gmail.com",
+    });
+
+    // Save Note in the database
+    nodemailer.save()
+        .then(data => {
+            res.send(data);
+        }).catch(err => {
+            res.status(500).send({
+                message: err.message || "Some error occurred while creating the Note."
+            });
+        });
 };
